@@ -1,6 +1,6 @@
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { FiMenu } from 'react-icons/fi';
+import { FiMenu, FiUsers, FiList } from 'react-icons/fi';
 import { Nav } from './sidebar.styles';
 
 const Sidebar: React.FC = () => {
@@ -13,10 +13,16 @@ const Sidebar: React.FC = () => {
 
             <ul>
                 <li>
-                    <a href="#" title="Cadastrar contato">Cadastrar contato</a>
+                    <a href="#" title="Cadastrar contato">
+                        <FiUsers size={18} />
+                        <span className="pl-3">Contatos</span>
+                    </a>
                 </li>
                 <li>
-                    <a href="#" title="Gerar listas">Gerar listas</a>
+                    <a href="#" title="Gerar listas">
+                        <FiList size={18} />
+                        <span className="pl-3">Gerar listas</span>
+                    </a>
                 </li>
             </ul>
         </Nav>

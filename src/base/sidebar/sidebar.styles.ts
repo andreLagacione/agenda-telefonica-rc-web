@@ -7,12 +7,14 @@ export const Nav = styled.nav`
         background-color: #2F333D;
     }
 
-    li, a {
+    li {
         display: block;
     }
 
     a {
-        padding: 10px;
+        display: flex;
+        align-items: center;
+        padding: 15px 10px;
         color: #fff;
 
         &:hover {

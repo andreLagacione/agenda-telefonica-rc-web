@@ -18,10 +18,10 @@ export const Asside = styled.aside`
 `;
 
 export const Main = styled.main`
-    background-color: #444A58;
     height: 100%;
     width: 100%;
     display: flex;
     flex-direction: column;
     flex-grow: 1;
+    padding: 25px;
 `;

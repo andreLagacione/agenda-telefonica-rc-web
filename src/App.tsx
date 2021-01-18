@@ -1,8 +1,9 @@
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { GlobalStyles } from './styles/global';
-import { AppComponent, Asside } from './styles/app.styles';
+import { AppComponent, Asside, Main } from './styles/app.styles';
 import Sidebar from './base/sidebar/sidebar';
+import Contatos from './pages/contatos/contatos';
 
 const App: React.FC = () => {
   return (
@@ -13,9 +14,9 @@ const App: React.FC = () => {
           <Sidebar />
         </Asside>
 
-        <main className="content d-flex flex-grow-1 h-100">
-          
-        </main>
+        <Main>
+          <Contatos />
+        </Main>
       </AppComponent>
     </>
   );
