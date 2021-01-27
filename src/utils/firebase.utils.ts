@@ -21,7 +21,9 @@ export default class FirebaseService {
             'abcd1234'
         );
 
-        console.log(firebase.auth().currentUser);
+        window.localStorage.setItem('USER_ID', JSON.stringify(firebase.auth().currentUser?.uid));
+        
+        console.log(firebase.auth().currentUser?.uid);
         return cred;
     };
 
@@ -30,10 +32,13 @@ export default class FirebaseService {
         let ref = firebaseDatabase.ref(nodePath);
 
         try {
-            return await ref.once('value')
-                .then(snapshot => {
-                    console.log(snapshot)
+            const data: any[] = [];
+            await ref.on('value', dataSnapshot => {
+                dataSnapshot.forEach(child => {
+                    data.push(child.val());
                 });
+            });
+            return data;
         } catch (e) {
             console.log(e);
         }

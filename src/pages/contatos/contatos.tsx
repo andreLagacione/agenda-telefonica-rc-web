@@ -4,8 +4,8 @@ import TitleComponent from '../../base/title/title';
 import FirebaseService from '../../utils/firebase.utils';
 
 const Contatos: React.FC = () => {
-    FirebaseService.auth().then(() => {
-        FirebaseService.getDataList('contatos');
+    FirebaseService.getDataList('contatos').then(data => {
+        console.log(data);
     });
 
     return (
