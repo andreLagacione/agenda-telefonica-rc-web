@@ -27,21 +27,26 @@ export default class FirebaseService {
         return cred;
     };
 
-    static getDataList = async (nodePath: any) => {
+    static getDataList = <T>(nodePath: string, callBack: Function) => {
 
         let ref = firebaseDatabase.ref(nodePath);
 
         try {
-            const data: any[] = [];
-            await ref.on('value', dataSnapshot => {
+            const data: T[] = [];
+            ref.on('value', dataSnapshot => {
                 dataSnapshot.forEach(child => {
                     data.push(child.val());
                 });
+
+                callBack(data);
             });
-            return data;
         } catch (e) {
             console.log(e);
         }
     };
+
+    static saveData = async <T>(nodePath: string, data: T) => {
+        return await firebaseDatabase.ref(nodePath).push(data);
+    }
 
 }

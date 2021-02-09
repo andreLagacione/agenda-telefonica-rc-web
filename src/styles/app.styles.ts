@@ -24,4 +24,5 @@ export const Main = styled.main`
     flex-direction: column;
     flex-grow: 1;
     padding: 25px;
+    overflow-y: auto;
 `;
