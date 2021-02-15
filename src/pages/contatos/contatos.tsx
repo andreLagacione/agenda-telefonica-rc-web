@@ -5,6 +5,7 @@ import FirebaseService from '../../utils/firebase.utils';
 import { FiEdit, FiTrash, FiUserPlus } from 'react-icons/fi';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Link } from 'react-router-dom';
 
 interface Contact {
     _id: string;
@@ -44,10 +45,10 @@ const Contatos: React.FC = () => {
             <div className="d-flex justify-content-between align-items-center">
                 <TitleComponent title="Contatos" />
 
-                <button type="button" className="btn btn-primary">
+                <Link to="/contatos/criar" type="button" className="btn btn-primary">
                     <FiUserPlus size={18} className="mr-3" />
                     Add contato
-                </button>
+                </Link>
             </div>
 
             <Table>

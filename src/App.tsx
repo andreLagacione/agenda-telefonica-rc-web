@@ -3,21 +3,24 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { GlobalStyles } from './styles/global';
 import { AppComponent, Asside, Main } from './styles/app.styles';
 import Sidebar from './base/sidebar/sidebar';
-import Contatos from './pages/contatos/contatos';
+import Routes from './routes';
+import { BrowserRouter } from 'react-router-dom';
 
 const App: React.FC = () => {
   return (
     <>
       <GlobalStyles />
-      <AppComponent>
-        <Asside>
-          <Sidebar />
-        </Asside>
+      <BrowserRouter>
+        <AppComponent>
+          <Asside>
+            <Sidebar />
+          </Asside>
 
-        <Main>
-          <Contatos />
-        </Main>
-      </AppComponent>
+          <Main>
+            <Routes />
+          </Main>
+        </AppComponent>
+      </BrowserRouter>
     </>
   );
 }
