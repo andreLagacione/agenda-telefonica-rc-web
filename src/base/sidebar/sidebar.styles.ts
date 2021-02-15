@@ -7,6 +7,13 @@ export const Nav = styled.nav`
         background-color: #2F333D;
     }
 
+    .icon {
+        display: inline-block;
+        width: 30px;
+        text-align: center;
+        cursor: pointer;
+    }
+
     li {
         display: block;
     }

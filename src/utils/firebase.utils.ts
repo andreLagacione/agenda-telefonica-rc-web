@@ -35,7 +35,10 @@ export default class FirebaseService {
             const data: T[] = [];
             ref.on('value', dataSnapshot => {
                 dataSnapshot.forEach(child => {
-                    data.push(child.val());
+                    data.push({
+                        ...child.val(),
+                        _id: child.key
+                    });
                 });
 
                 callBack(data);
@@ -47,6 +50,10 @@ export default class FirebaseService {
 
     static saveData = async <T>(nodePath: string, data: T) => {
         return await firebaseDatabase.ref(nodePath).push(data);
+    }
+
+    static removeData = async (nodePath: string, id: string) => {
+        return await firebaseDatabase.ref(`${nodePath}/${id}`).remove();
     }
 
 }
