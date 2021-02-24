@@ -56,4 +56,8 @@ export default class FirebaseService {
         return await firebaseDatabase.ref(`${nodePath}/${id}`).remove();
     }
 
+    static createData = async <T>(nodePath: string, data: T) => {
+        return await firebaseDatabase.ref(`${nodePath}`).push(data);
+    }
+
 }
