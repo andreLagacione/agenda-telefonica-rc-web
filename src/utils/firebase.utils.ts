@@ -57,7 +57,7 @@ export default class FirebaseService {
     }
 
     static createData = async <T>(nodePath: string, data: T) => {
-        return await firebaseDatabase.ref(`${nodePath}`).push(data);
+        return await firebaseDatabase.ref(nodePath).push(data);
     }
 
 }

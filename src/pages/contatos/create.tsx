@@ -14,6 +14,7 @@ const CreateContact: React.FC = () => {
     const [validationMessage, setValidationMessage] = useState<string>('');
     const [isPhoneValid, setIsPhoneValid] = useState<boolean>(false);
     const [isPhoneTouched, setIsPhoneTouched] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     let title = 'Criar contato';
 
     const getPhoneMask = (value: string) => {
@@ -27,6 +28,26 @@ const CreateContact: React.FC = () => {
         const message = isValid ? '' : 'Telefone inválido.';
         setIsPhoneValid(isValid);
         setValidationMessage(message);
+
+        if (isValid) {
+            setIsLoading(true);
+            checkByKeyAndValue();
+        } else {
+            setIsLoading(false);
+        }
+    }
+
+    const checkByKeyAndValue = async () => {
+        FirebaseService.getDataList<Contact>('contatos', filterContacts);
+    }
+
+    const filterContacts = (data: Contact[]) => {
+        const filtered = data.filter(item => item.phone === phone);
+        setIsLoading(false);
+
+        if (filtered.length) {
+            setValidationMessage('Este telefone já foi cadastrado.');
+        }
     }
 
     const saveContact = () => {
@@ -66,11 +87,13 @@ const CreateContact: React.FC = () => {
                                 value={phone}
                                 onChange={(e: any) => getPhoneMask(e.target.value)}
                                 onFocus={() => setIsPhoneTouched(true)}
-                                onBlur={() => validatePhone()}
                             />
 
                             <small className="validate-message text-danger mt-1 d-block">{ validationMessage }</small>
-                            <span className="icon">
+                            <span
+                                className="icon"
+                                hidden={ !isLoading }
+                            >
                                 <ClipLoader color="#222" loading={true} size={18} />
                             </span>
                         </div>
@@ -93,7 +116,7 @@ const CreateContact: React.FC = () => {
                             type="button"
                             className="btn btn-primary ml-3"
                             onClick={() => saveContact()}
-                            disabled={!isPhoneValid}
+                            disabled={!isPhoneValid || isLoading}
                         >Salvar</button>
                     </div>
                 </form>
