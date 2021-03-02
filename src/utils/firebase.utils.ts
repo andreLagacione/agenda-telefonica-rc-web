@@ -27,7 +27,7 @@ export default class FirebaseService {
         return cred;
     };
 
-    static getDataList = <T>(nodePath: string, callBack: Function) => {
+    static getDataList = <T>(nodePath: string, callBack: Function, action: string) => {
 
         let ref = firebaseDatabase.ref(nodePath);
 
@@ -35,13 +35,14 @@ export default class FirebaseService {
             const data: T[] = [];
             ref.on('value', dataSnapshot => {
                 dataSnapshot.forEach(child => {
+                    console.log(child.key, child.val());
                     data.push({
                         ...child.val(),
                         _id: child.key
                     });
                 });
 
-                callBack(data);
+                callBack(data, action);
             });
         } catch (e) {
             console.log(e);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Form from '../../base/form/form.styles';
 import { phoneMask } from '../../base/masks/phone';
 import TitleComponent from '../../base/title/title';
@@ -17,9 +17,18 @@ const CreateContact: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     let title = 'Criar contato';
 
+    useEffect(() => {
+        getPhoneMask(phone);
+    }, [phone]);
+
     const getPhoneMask = (value: string) => {
+        if (!value) {
+            return;
+        }
+        
         const masked = phoneMask(value);
         setPhone(masked);
+        console.log(value, masked, phone);
         validatePhone();
     }
 
@@ -38,15 +47,22 @@ const CreateContact: React.FC = () => {
     }
 
     const checkByKeyAndValue = async () => {
-        FirebaseService.getDataList<Contact>('contatos', filterContacts);
+        if(phone.length) {
+            FirebaseService.getDataList<Contact>('contatos', filterContacts, 'create');
+        }
     }
 
-    const filterContacts = (data: Contact[]) => {
+    const filterContacts = (data: Contact[], action: string) => {
+        if (action !== 'create') {
+            return;
+        }
+        
         const filtered = data.filter(item => item.phone === phone);
         setIsLoading(false);
 
         if (filtered.length) {
             setValidationMessage('Este telefone já foi cadastrado.');
+            setIsPhoneValid(false);
         }
     }
 
@@ -62,6 +78,7 @@ const CreateContact: React.FC = () => {
                 toast.success('Contato criado!');
                 setName('');
                 setPhone('');
+                setValidationMessage('');
                 setIsPhoneValid(false);
                 setIsPhoneTouched(false);
             },
@@ -85,7 +102,7 @@ const CreateContact: React.FC = () => {
                                 placeholder="(99) 9 9999-9999"
                                 maxLength={16}
                                 value={phone}
-                                onChange={(e: any) => getPhoneMask(e.target.value)}
+                                onChange={(e: any) => setPhone(e.target.value)}
                                 onFocus={() => setIsPhoneTouched(true)}
                             />
 
