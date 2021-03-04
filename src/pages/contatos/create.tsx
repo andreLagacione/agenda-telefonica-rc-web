@@ -7,15 +7,18 @@ import FirebaseService from '../../utils/firebase.utils';
 import { Contact } from './contatos';
 import { ToastContainer, toast } from 'react-toastify';
 import ClipLoader from "react-spinners/ClipLoader";
+import { useHistory, useParams } from 'react-router-dom';
 
 const CreateContact: React.FC = () => {
+    const history = useHistory();
     const [name, setName] = useState<string>('');
     const [phone, setPhone] = useState<string>('');
     const [validationMessage, setValidationMessage] = useState<string>('');
     const [isPhoneValid, setIsPhoneValid] = useState<boolean>(false);
     const [isPhoneTouched, setIsPhoneTouched] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    let title = 'Criar contato';
+    let { id }: { id: string } = useParams();
+    let title = id ? 'Editar Contato' : 'Criar contato';
 
     useEffect(() => {
         getPhoneMask(phone);
@@ -28,7 +31,6 @@ const CreateContact: React.FC = () => {
         
         const masked = phoneMask(value);
         setPhone(masked);
-        console.log(value, masked, phone);
         validatePhone();
     }
 
@@ -48,15 +50,12 @@ const CreateContact: React.FC = () => {
 
     const checkByKeyAndValue = async () => {
         if(phone.length) {
-            FirebaseService.getDataList<Contact>('contatos', filterContacts, 'create');
+            FirebaseService.findByPhone('contatos', phone);
+            // FirebaseService.getDataList<Contact>('contatos', filterContacts);
         }
     }
 
-    const filterContacts = (data: Contact[], action: string) => {
-        if (action !== 'create') {
-            return;
-        }
-        
+    const filterContacts = (data: Contact[]) => {
         const filtered = data.filter(item => item.phone === phone);
         setIsLoading(false);
 
@@ -66,24 +65,40 @@ const CreateContact: React.FC = () => {
         }
     }
 
-    const saveContact = () => {
+    const submitForm = () => {
         const value: Contact = {
             _id: '',
             name: name || '-',
             phone,
         };
 
-        FirebaseService.createData<Contact>('contatos', value).then(
+        if (id) {
+            updateContact(value);
+        } else {
+            createContact(value);
+        }
+    }
+
+    const createContact = (contact: Contact) => {
+        FirebaseService.createData<Contact>('contatos', contact).then(
             _response => {
                 toast.success('Contato criado!');
-                setName('');
-                setPhone('');
-                setValidationMessage('');
-                setIsPhoneValid(false);
-                setIsPhoneTouched(false);
+                clearStates();
             },
             _error => toast.error('Erro ao criar contato', _error),
-        )
+        );
+    }
+
+    const updateContact = (contact: Contact) => {
+
+    }
+
+    const clearStates = () => {
+        setName('');
+        setPhone('');
+        setValidationMessage('');
+        setIsPhoneValid(false);
+        setIsPhoneTouched(false);
     }
 
     return (
@@ -128,11 +143,11 @@ const CreateContact: React.FC = () => {
                     </div>
 
                     <div className="d-flex justify-content-end mt-3">
-                        <button type="button" className="btn btn-secondary">Voltar</button>
+                        <button type="button" className="btn btn-secondary" onClick={() => history.goBack()}>Voltar</button>
                         <button
                             type="button"
                             className="btn btn-primary ml-3"
-                            onClick={() => saveContact()}
+                            onClick={() => submitForm()}
                             disabled={!isPhoneValid || isLoading}
                         >Salvar</button>
                     </div>

@@ -12,7 +12,8 @@ const config = {
 };
 
 export const firebaseImpl = firebase.initializeApp(config);
-export const firebaseDatabase = firebase.database();
+export const database = firebase.database();
+export const firestore = firebase.firestore();
 
 export default class FirebaseService {
     static auth = async () => {
@@ -27,22 +28,22 @@ export default class FirebaseService {
         return cred;
     };
 
-    static getDataList = <T>(nodePath: string, callBack: Function, action: string) => {
+    static getDataList = <T>(nodePath: string, callBack: Function) => {
 
-        let ref = firebaseDatabase.ref(nodePath);
+        let ref = database.ref(nodePath);
 
         try {
-            const data: T[] = [];
+            let data: T[] = [];
             ref.on('value', dataSnapshot => {
+                data = [];
                 dataSnapshot.forEach(child => {
-                    console.log(child.key, child.val());
                     data.push({
                         ...child.val(),
                         _id: child.key
                     });
                 });
-
-                callBack(data, action);
+                callBack(data);
+                ref.off();
             });
         } catch (e) {
             console.log(e);
@@ -50,15 +51,29 @@ export default class FirebaseService {
     };
 
     static saveData = async <T>(nodePath: string, data: T) => {
-        return await firebaseDatabase.ref(nodePath).push(data);
+        return await database.ref(nodePath).push(data);
     }
 
     static removeData = async (nodePath: string, id: string) => {
-        return await firebaseDatabase.ref(`${nodePath}/${id}`).remove();
+        return await database.ref(`${nodePath}/${id}`).remove();
+    }
+
+    static findByPhone = async (collection: string, phone: string) => {
+        firestore.collection(collection).where('phone', '==', phone)
+            .get()
+            .then(querySnapshot => {
+                querySnapshot.forEach(doc => {
+                    console.log(doc);
+                });
+            });
     }
 
     static createData = async <T>(nodePath: string, data: T) => {
-        return await firebaseDatabase.ref(nodePath).push(data);
+        return await database.ref(nodePath).push(data);
+    }
+
+    static getById = async <T>(nodePath: string, data: T) => {
+        return await database.ref(nodePath);
     }
 
 }

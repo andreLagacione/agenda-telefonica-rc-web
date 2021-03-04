@@ -17,14 +17,10 @@ const Contatos: React.FC = () => {
     const [contacts, setContacts] = useState<Contact[]>([]);
 
     useEffect(() => {
-        FirebaseService.getDataList<Contact>('contatos', getContacts, 'list');
+        FirebaseService.getDataList<Contact>('contatos', getContacts);
     }, []);
 
-    const getContacts = (data: Contact[], action: string) => {
-        if (action !== 'list') {
-            return;
-        }
-        
+    const getContacts = (data: Contact[]) => {
         if (data?.length) {
             setContacts(data);
         }
@@ -37,7 +33,7 @@ const Contatos: React.FC = () => {
             FirebaseService.removeData('contatos', contact._id).then(
                 _response => {
                     toast.success('Contato removido!');
-                    FirebaseService.getDataList<Contact>('contatos', getContacts, 'list');
+                    FirebaseService.getDataList<Contact>('contatos', getContacts);
                 },
                 _error => toast.error('Erro ao remover contato', _error),
             );
@@ -73,9 +69,9 @@ const Contatos: React.FC = () => {
                                         <td>{ item.name }</td>
                                         <td>{ item.phone }</td>
                                         <td className="col-acoes">
-                                            <button type="button" className="btn btn-primary btn-sm">
+                                            <Link to={`/contatos/${item._id}`} type="button" className="btn btn-primary btn-sm">
                                                 <FiEdit />
-                                            </button>
+                                            </Link>
                                             <button
                                                 type="button"
                                                 className="btn btn-danger btn-sm ml-4"
