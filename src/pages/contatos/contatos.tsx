@@ -17,13 +17,20 @@ const Contatos: React.FC = () => {
     const [contacts, setContacts] = useState<Contact[]>([]);
 
     useEffect(() => {
-        FirebaseService.getDataList<Contact>('contatos', getContacts);
+        FirebaseService.getDataList('contatos')
+            .then(querySnapshot => getContacts(querySnapshot));
     }, []);
 
-    const getContacts = (data: Contact[]) => {
-        if (data?.length) {
-            setContacts(data);
-        }
+    const getContacts = (querySnapshot: any) => {
+        const data: Contact[] = [];
+        querySnapshot.forEach((doc: any) => {
+            data.push({
+                ...doc.data(),
+                _id: doc.id
+            });
+        });
+
+        setContacts(data);
     }
 
     const removeContact = (contact: Contact) => {
@@ -33,7 +40,8 @@ const Contatos: React.FC = () => {
             FirebaseService.removeData('contatos', contact._id).then(
                 _response => {
                     toast.success('Contato removido!');
-                    FirebaseService.getDataList<Contact>('contatos', getContacts);
+                    FirebaseService.getDataList('contatos')
+                        .then(querySnapshot => getContacts(querySnapshot));
                 },
                 _error => toast.error('Erro ao remover contato', _error),
             );

@@ -20,6 +20,10 @@ const CreateContact: React.FC = () => {
     let { id }: { id: string } = useParams();
     let title = id ? 'Editar Contato' : 'Criar contato';
 
+    if (id) {
+        getContatctById();
+    }
+
     useEffect(() => {
         getPhoneMask(phone);
     }, [phone]);
@@ -42,32 +46,31 @@ const CreateContact: React.FC = () => {
 
         if (isValid) {
             setIsLoading(true);
-            checkByKeyAndValue();
+            checkIfPhoneExists();
         } else {
             setIsLoading(false);
         }
     }
 
-    const checkByKeyAndValue = async () => {
+    const checkIfPhoneExists = () => {
         if(phone.length) {
-            FirebaseService.findByPhone('contatos', phone);
-            // FirebaseService.getDataList<Contact>('contatos', filterContacts);
-        }
-    }
+            FirebaseService.findByField('contatos', 'phone', '==', phone)
+                .then(
+                    data => {
+                        setIsLoading(false);
 
-    const filterContacts = (data: Contact[]) => {
-        const filtered = data.filter(item => item.phone === phone);
-        setIsLoading(false);
-
-        if (filtered.length) {
-            setValidationMessage('Este telefone já foi cadastrado.');
-            setIsPhoneValid(false);
+                        if (!data.empty) {
+                            setIsPhoneValid(false);
+                            setValidationMessage('Este telefone já foi cadastrado.');
+                        }
+                    }
+                );
         }
     }
 
     const submitForm = () => {
         const value: Contact = {
-            _id: '',
+            _id: id || '',
             name: name || '-',
             phone,
         };
@@ -82,6 +85,7 @@ const CreateContact: React.FC = () => {
     const createContact = (contact: Contact) => {
         FirebaseService.createData<Contact>('contatos', contact).then(
             _response => {
+                console.log(_response);
                 toast.success('Contato criado!');
                 clearStates();
             },
@@ -100,6 +104,17 @@ const CreateContact: React.FC = () => {
         setIsPhoneValid(false);
         setIsPhoneTouched(false);
     }
+
+    function getContatctById() {
+        FirebaseService.findByField('contatos', 'id', '==', id)
+        .then(
+            data => {
+                setIsLoading(false);
+
+                console.log(data);
+            }
+        );
+    };
 
     return (
         <>

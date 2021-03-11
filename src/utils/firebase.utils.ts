@@ -1,4 +1,5 @@
 import firebase from 'firebase';
+import { WhereFilterOp } from '@firebase/firestore-types';
 
 const config = {
     apiKey: "AIzaSyA0zwk4R_geAxuhSnsh8msajlFZfetnwoU",
@@ -12,7 +13,6 @@ const config = {
 };
 
 export const firebaseImpl = firebase.initializeApp(config);
-export const database = firebase.database();
 export const firestore = firebase.firestore();
 
 export default class FirebaseService {
@@ -28,52 +28,24 @@ export default class FirebaseService {
         return cred;
     };
 
-    static getDataList = <T>(nodePath: string, callBack: Function) => {
-
-        let ref = database.ref(nodePath);
-
-        try {
-            let data: T[] = [];
-            ref.on('value', dataSnapshot => {
-                data = [];
-                dataSnapshot.forEach(child => {
-                    data.push({
-                        ...child.val(),
-                        _id: child.key
-                    });
-                });
-                callBack(data);
-                ref.off();
-            });
-        } catch (e) {
-            console.log(e);
-        }
+    static getDataList = (database: string) => {
+        return firestore.collection(database).get();
     };
 
-    static saveData = async <T>(nodePath: string, data: T) => {
-        return await database.ref(nodePath).push(data);
+    static saveData = <T>(collection: string, id: string, data: T) => {
+        return firestore.collection(collection).doc(id).update(data);
     }
 
-    static removeData = async (nodePath: string, id: string) => {
-        return await database.ref(`${nodePath}/${id}`).remove();
+    static removeData = (database: string, id: string) => {
+        return firestore.collection(database).doc(id).delete();
     }
 
-    static findByPhone = async (collection: string, phone: string) => {
-        firestore.collection(collection).where('phone', '==', phone)
-            .get()
-            .then(querySnapshot => {
-                querySnapshot.forEach(doc => {
-                    console.log(doc);
-                });
-            });
+    static findByField = (database: string, field: string, condition: WhereFilterOp, value: string) => {
+        return firestore.collection(database).where(field, condition, value).get();
     }
 
-    static createData = async <T>(nodePath: string, data: T) => {
-        return await database.ref(nodePath).push(data);
-    }
-
-    static getById = async <T>(nodePath: string, data: T) => {
-        return await database.ref(nodePath);
+    static createData = <T>(collection: string, data: T) => {
+        return firestore.collection(collection).add(data);
     }
 
 }
