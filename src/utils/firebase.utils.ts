@@ -44,8 +44,8 @@ export default class FirebaseService {
         return firestore.collection(database).where(field, condition, value).get();
     }
 
-    static createData = <T>(collection: string, data: T) => {
-        return firestore.collection(collection).add(data);
+    static createDocReference = (collection: string) => {
+        return firestore.collection(collection).doc();
     }
 
 }

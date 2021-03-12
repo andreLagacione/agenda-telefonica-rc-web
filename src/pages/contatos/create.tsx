@@ -8,25 +8,29 @@ import { Contact } from './contatos';
 import { ToastContainer, toast } from 'react-toastify';
 import ClipLoader from "react-spinners/ClipLoader";
 import { useHistory, useParams } from 'react-router-dom';
+import { DocumentData } from '@firebase/firestore-types';
 
 const CreateContact: React.FC = () => {
     const history = useHistory();
     const [name, setName] = useState<string>('');
     const [phone, setPhone] = useState<string>('');
     const [validationMessage, setValidationMessage] = useState<string>('');
+    const [backupPhone, setBackupPhone] = useState<string>('');
     const [isPhoneValid, setIsPhoneValid] = useState<boolean>(false);
     const [isPhoneTouched, setIsPhoneTouched] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     let { id }: { id: string } = useParams();
     let title = id ? 'Editar Contato' : 'Criar contato';
 
-    if (id) {
-        getContatctById();
-    }
-
     useEffect(() => {
         getPhoneMask(phone);
     }, [phone]);
+
+    useEffect(() => {
+        if (id) {
+            getContatctById();
+        }
+    }, [id]);
 
     const getPhoneMask = (value: string) => {
         if (!value) {
@@ -35,7 +39,10 @@ const CreateContact: React.FC = () => {
         
         const masked = phoneMask(value);
         setPhone(masked);
-        validatePhone();
+
+        if (backupPhone !== phone) {
+            validatePhone();
+        }
     }
 
     const validatePhone = () => {
@@ -83,9 +90,11 @@ const CreateContact: React.FC = () => {
     }
 
     const createContact = (contact: Contact) => {
-        FirebaseService.createData<Contact>('contatos', contact).then(
+        const ref = FirebaseService.createDocReference('contatos');
+        contact._id = ref.id;
+
+        ref.set(contact).then(
             _response => {
-                console.log(_response);
                 toast.success('Contato criado!');
                 clearStates();
             },
@@ -94,7 +103,18 @@ const CreateContact: React.FC = () => {
     }
 
     const updateContact = (contact: Contact) => {
+        FirebaseService.saveData('contatos', id, contact)
+            .then(
+                _response => {
+                    toast.success('Contato atualizado!');
+                    clearStates();
 
+                    setTimeout(() => {
+                        history.goBack();
+                    }, 1000);
+                },
+                _error => toast.error('Erro ao atualizar contato', _error),
+            );
     }
 
     const clearStates = () => {
@@ -105,15 +125,19 @@ const CreateContact: React.FC = () => {
         setIsPhoneTouched(false);
     }
 
-    function getContatctById() {
-        FirebaseService.findByField('contatos', 'id', '==', id)
-        .then(
-            data => {
-                setIsLoading(false);
-
-                console.log(data);
-            }
-        );
+    const getContatctById = () => {
+        FirebaseService.findByField('contatos', '_id', '==', id)
+            .then(
+                (data: DocumentData) => {
+                    setIsLoading(false);
+                    const doc = data.docs[0].data();
+                    setBackupPhone(doc.phone);
+                    setPhone(doc.phone);
+                    setName(doc.name);
+                    setValidationMessage('');
+                    setIsPhoneValid(true);
+                }
+            );
     };
 
     return (
