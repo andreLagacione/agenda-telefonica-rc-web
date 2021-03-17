@@ -4,11 +4,11 @@ import { phoneMask } from '../../base/masks/phone';
 import TitleComponent from '../../base/title/title';
 import { phoneValidator } from '../../base/validators/phone';
 import FirebaseService from '../../utils/firebase.utils';
-import { Contact } from './contatos';
 import { ToastContainer, toast } from 'react-toastify';
 import ClipLoader from "react-spinners/ClipLoader";
 import { useHistory, useParams } from 'react-router-dom';
 import { DocumentData } from '@firebase/firestore-types';
+import { Contact } from '../../base/contact/contact.model';
 
 const CreateContact: React.FC = () => {
     const history = useHistory();

@@ -6,12 +6,7 @@ import { FiEdit, FiTrash, FiUserPlus } from 'react-icons/fi';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Link } from 'react-router-dom';
-
-export interface Contact {
-    _id: string;
-    name: string;
-    phone: string;
-}
+import { Contact } from '../../base/contact/contact.model';
 
 const Contatos: React.FC = () => {
     const [contacts, setContacts] = useState<Contact[]>([]);
@@ -24,10 +19,7 @@ const Contatos: React.FC = () => {
     const getContacts = (querySnapshot: any) => {
         const data: Contact[] = [];
         querySnapshot.forEach((doc: any) => {
-            data.push({
-                ...doc.data(),
-                _id: doc.id
-            });
+            data.push({...doc.data()});
         });
 
         setContacts(data);
