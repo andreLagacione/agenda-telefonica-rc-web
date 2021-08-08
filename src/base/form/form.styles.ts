@@ -1,6 +1,10 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
-const Form = styled.div`
+interface FormParams {
+    withoutLabel?: boolean;
+}
+
+const Form = styled.div<FormParams>`
     .validate-message {
         font-size: 13px;
     }
@@ -9,6 +13,14 @@ const Form = styled.div`
         position: absolute;
         right: 25px;
         top: 34px;
+
+        ${props => props.withoutLabel && css `
+            top: 10px;
+        `}
+    }
+
+    .btn-save {
+        width: 75px;
     }
 `;
 

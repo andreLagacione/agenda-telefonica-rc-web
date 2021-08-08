@@ -9,6 +9,8 @@ import ClipLoader from "react-spinners/ClipLoader";
 import { useHistory, useParams } from 'react-router-dom';
 import { DocumentData } from '@firebase/firestore-types';
 import { Contact } from '../../base/contact/contact.model';
+import { FaSpinner } from 'react-icons/fa';
+import { Spinner } from './contatos.styles';
 
 const CreateContact: React.FC = () => {
     const history = useHistory();
@@ -19,6 +21,7 @@ const CreateContact: React.FC = () => {
     const [isPhoneValid, setIsPhoneValid] = useState<boolean>(false);
     const [isPhoneTouched, setIsPhoneTouched] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isSaving, setIsSaving] = useState<boolean>(false);
     let { id }: { id: string } = useParams();
     let title = id ? 'Editar Contato' : 'Criar contato';
 
@@ -64,28 +67,31 @@ const CreateContact: React.FC = () => {
             FirebaseService.findByField('contatos', 'phone', '==', phone)
                 .then(
                     data => {
-                        setIsLoading(false);
-
                         if (!data.empty) {
                             setIsPhoneValid(false);
                             setValidationMessage('Este telefone já foi cadastrado.');
                         }
                     }
+                )
+                .finally(
+                    () => setIsLoading(false)
                 );
         }
     }
 
     const submitForm = () => {
-        const value: Contact = {
+        setIsSaving(true);
+
+        const contact: Contact = {
             _id: id || '',
             name: name || '-',
             phone,
         };
 
         if (id) {
-            updateContact(value);
+            updateContact(contact);
         } else {
-            createContact(value);
+            createContact(contact);
         }
     }
 
@@ -99,6 +105,9 @@ const CreateContact: React.FC = () => {
                 clearStates();
             },
             _error => toast.error('Erro ao criar contato', _error),
+        )
+        .finally(
+            () => setIsSaving(false)
         );
     }
 
@@ -114,6 +123,9 @@ const CreateContact: React.FC = () => {
                     }, 1000);
                 },
                 _error => toast.error('Erro ao atualizar contato', _error),
+            )
+            .finally(
+                () => setIsSaving(false)
             );
     }
 
@@ -129,7 +141,6 @@ const CreateContact: React.FC = () => {
         FirebaseService.findByField('contatos', '_id', '==', id)
             .then(
                 (data: DocumentData) => {
-                    setIsLoading(false);
                     const doc = data.docs[0].data();
                     setBackupPhone(doc.phone);
                     setPhone(doc.phone);
@@ -137,6 +148,9 @@ const CreateContact: React.FC = () => {
                     setValidationMessage('');
                     setIsPhoneValid(true);
                 }
+            )
+            .finally(
+                () => setIsLoading(false)
             );
     };
 
@@ -185,10 +199,20 @@ const CreateContact: React.FC = () => {
                         <button type="button" className="btn btn-secondary" onClick={() => history.goBack()}>Voltar</button>
                         <button
                             type="button"
-                            className="btn btn-primary ml-3"
+                            className="btn btn-primary ml-3 btn-save"
                             onClick={() => submitForm()}
-                            disabled={!isPhoneValid || isLoading}
-                        >Salvar</button>
+                            disabled={!isPhoneValid || isSaving}
+                        >
+                            {
+                                isSaving
+                                ?
+                                <Spinner backgroundTransparent className="d-flex justify-content-center align-items-center">
+                                    <FaSpinner size={20} className="loader" color="#fff" />
+                                </Spinner>
+                                :
+                                'Salvar'
+                            }
+                        </button>
                     </div>
                 </form>
             </Form>

@@ -28,7 +28,11 @@ export default class FirebaseService {
         return cred;
     };
 
-    static getDataList = (database: string) => {
+    static getDataList = (database: string, query = '') => {
+        if (query.length) {
+            return firestore.collection(database).where('name', '==', query.trim().toLowerCase()).get();
+        }
+
         return firestore.collection(database).get();
     };
 
