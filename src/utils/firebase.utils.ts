@@ -30,7 +30,7 @@ export default class FirebaseService {
 
     static getDataList = (database: string, query = '') => {
         if (query.length) {
-            return firestore.collection(database).where('name', '==', query.trim().toLowerCase()).get();
+            return firestore.collection(database).where('name', '==', query.trim()).get();
         }
 
         return firestore.collection(database).get();

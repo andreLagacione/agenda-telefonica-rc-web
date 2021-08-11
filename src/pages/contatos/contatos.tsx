@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom';
 import { Contact } from '../../base/contact/contact.model';
 import { Spinner, Container } from './contatos.styles';
 import Form from '../../base/form/form.styles';
+import { useConfirm } from '../../hooks/confirm';
 
 const Contatos: React.FC = () => {
     const [contacts, setContacts] = useState<Contact[]>([]);
@@ -18,12 +19,20 @@ const Contatos: React.FC = () => {
     const [contactIdDeleting, setContactIdDeleting] = useState<string>('');
     let timeoutControl: any;
     const inputRef = useRef<HTMLInputElement>(null);
+    const { addConfirm, removeConfirm, idConfirmedItem } = useConfirm();
 
     useEffect(() => {
         loadContacts();
     }, []);
 
-    const loadContacts = (query = '') => {
+    useEffect(() => {
+        if (idConfirmedItem) {
+            removeContact(idConfirmedItem);
+            removeConfirm();
+        }
+    }, [idConfirmedItem]);
+
+    const loadContacts = useCallback((query = '') => {
         setLoading(true);
 
         FirebaseService
@@ -37,43 +46,25 @@ const Contatos: React.FC = () => {
             .finally(
                 () => setLoading(false)
             );
-    }
+    }, []);
 
-    const getContacts = (querySnapshot: any) => {
+    const getContacts = useCallback((querySnapshot: any) => {
         const data: Contact[] = [];
         querySnapshot.forEach((doc: any) => {
             data.push({ ...doc.data() });
         });
 
         setContacts(data);
-    }
+    }, []);
 
-    const removeContact = (contact: Contact) => {
-        const confirmation = window.confirm(`Você tem certeza que deseja remover o contato ${contact.phone}?`);
-
-        if (confirmation) {
-            setDeleting(true);
-            setContactIdDeleting(contact._id);
-
-            FirebaseService
-                .removeData('contatos', contact._id)
-                .then(
-                    _response => {
-                        toast.success('Contato removido!');
-                        loadContacts();
-                    },
-                )
-                .catch(
-                    _error => toast.error('Erro ao remover contato', _error)
-                )
-                .finally(
-                    () => {
-                        setDeleting(false);
-                        setContactIdDeleting('');
-                    }
-                );
-        }
-    }
+    const handleRemoveContact = useCallback((contact: Contact) => {
+        addConfirm({
+            itemId: contact._id,
+            title: 'Remover Contato',
+            message: `Você tem certeza que deseja remover o contato ${contact.name ? `${contact.name} -` : ''} ${contact.phone}`,
+            visible: true,
+        });
+    }, []);
 
     const handleSearchContact = useCallback((query: string | undefined, event: FormEvent | InputEvent) => {
         event.preventDefault();
@@ -86,6 +77,29 @@ const Contatos: React.FC = () => {
             console.log(query);
             loadContacts(query);
         }, 300);
+    }, []);
+
+    const removeContact = useCallback((itemId) => {
+        setDeleting(true);
+        setContactIdDeleting(itemId);
+
+        FirebaseService
+            .removeData('contatos', itemId)
+            .then(
+                _response => {
+                    toast.success('Contato removido!');
+                    loadContacts();
+                },
+            )
+            .catch(
+                _error => toast.error('Erro ao remover contato', _error)
+            )
+            .finally(
+                () => {
+                    setDeleting(false);
+                    setContactIdDeleting('');
+                }
+            );
     }, []);
 
     return (
@@ -131,7 +145,7 @@ const Contatos: React.FC = () => {
                     <FaSpinner size={50} className="loader" color="#fff" />
                 </Spinner>
                 :
-                <div className="d-flex flex-column flex-grow-1 h-100">
+                <div className="d-flex flex-column flex-grow-1 h-100 overflow-hidden">
                     {
                         !contacts.length
                         ?
@@ -140,7 +154,7 @@ const Contatos: React.FC = () => {
                         </div>
                         :
                         <Table className="flex-grow-1 overflow-auto w-100 mt-4">
-                            <table className="table table-dark table-hover">
+                            <table className="table table-dark table-hover mb-0">
                                 <thead>
                                     <tr>
                                         <th>Nome</th>
@@ -163,7 +177,7 @@ const Contatos: React.FC = () => {
                                                         <button
                                                             type="button"
                                                             className="btn btn-danger btn-sm ml-4"
-                                                            onClick={() => removeContact(item)}
+                                                            onClick={() => handleRemoveContact(item)}
                                                         >
                                                             {
                                                                 deleting && contactIdDeleting === item._id
@@ -184,6 +198,7 @@ const Contatos: React.FC = () => {
                     }
                 </div>
             }
+
             <ToastContainer />
         </Container>
     );

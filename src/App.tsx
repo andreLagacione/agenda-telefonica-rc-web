@@ -5,21 +5,24 @@ import { AppComponent, Asside, Main } from './styles/app.styles';
 import Sidebar from './base/sidebar/sidebar';
 import Routes from './routes';
 import { BrowserRouter } from 'react-router-dom';
+import AppProvider from './hooks';
 
 const App: React.FC = () => {
   return (
     <>
       <GlobalStyles />
       <BrowserRouter>
-        <AppComponent>
-          <Asside>
-            <Sidebar />
-          </Asside>
+        <AppProvider>
+          <AppComponent>
+            <Asside>
+              <Sidebar />
+            </Asside>
 
-          <Main>
-            <Routes />
-          </Main>
-        </AppComponent>
+            <Main>
+              <Routes />
+            </Main>
+          </AppComponent>
+        </AppProvider>
       </BrowserRouter>
     </>
   );
