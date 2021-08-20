@@ -1,5 +1,6 @@
 import firebase from 'firebase';
 import { WhereFilterOp } from '@firebase/firestore-types';
+import { Contact } from '../base/contact/contact.model';
 
 const config = {
     apiKey: "AIzaSyA0zwk4R_geAxuhSnsh8msajlFZfetnwoU",
@@ -30,10 +31,18 @@ export default class FirebaseService {
 
     static getDataList = (database: string, query = '') => {
         if (query.length) {
-            return firestore.collection(database).where('name', '==', query.trim()).get();
+            return firestore
+                    .collection(database)
+                    .orderBy('name')
+                    .startAt(query.trim())
+                    .endAt(`${query.trim()}\\uf8ff`)
+                    .get();
         }
 
-        return firestore.collection(database).get();
+        return firestore
+                .collection(database)
+                .orderBy('name')
+                .get();
     };
 
     static saveData = <T>(collection: string, id: string, data: T) => {
